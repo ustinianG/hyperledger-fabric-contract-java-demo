@@ -1,0 +1,31 @@
+
+
+version: '2.0'
+
+services:
+
+  prometheus:
+    image: prom/prometheus:latest
+    restart: always
+    container_name: prometheus
+    ports:
+      - 9999:9090
+    extra_hosts:
+      - "orderer0.example.com:192.168.0.105"
+      - "orderer1.example.com:192.168.0.105"
+      - "orderer2.example.com:192.168.0.105"
+      - "peer0.org1.example.com:192.168.0.109"
+      - "peer1.org1.example.com:192.168.0.109"
+      - "peer0.org2.example.com:192.168.0.110"
+      - "peer1.org2.example.com:192.168.0.110"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+
+  grafana:
+    image: grafana/grafana
+    restart: always
+    container_name: grafana
+    ports:
+      - 3000:3000
+    depends_on:
+      - prometheus

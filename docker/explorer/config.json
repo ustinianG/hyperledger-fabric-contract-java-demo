@@ -1,0 +1,9 @@
+{
+  "network-configs": {
+    "prod-network": {
+      "name": "Prod Network",
+      "profile": "./connection-profile/org1ProdNetworkConnection.json"
+    }
+  },
+  "license": "Apache-2.0"
+}

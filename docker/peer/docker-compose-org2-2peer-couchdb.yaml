@@ -1,0 +1,152 @@
+
+
+version: '2.0'
+
+services:
+
+    peer0.org2.example.com:
+        image: hyperledger/fabric-peer:2.4.1
+        restart: always
+        container_name: peer0.org2.example.com
+        hostname: peer0.org2.example.com
+        ports:
+            - 7051:7051
+            - 7052:7052
+            - 9443:9443
+        extra_hosts:
+            - "orderer0.example.com:192.168.0.105"
+            - "orderer1.example.com:192.168.0.105"
+            - "orderer2.example.com:192.168.0.105"
+            - "peer0.org1.example.com:192.168.0.109"
+            - "peer1.org1.example.com:192.168.0.109"
+            - "peer0.org2.example.com:192.168.0.110"
+            - "peer1.org2.example.com:192.168.0.110"
+        environment:
+            - FABRIC_LOGGING_SPEC=INFO
+            - FABRIC_LOGGING_FORMAT="%{color}%{time:2006-01-02 15:04:05.000 MST} [%{module}] %{shortfunc} -> %{level:.4s} %{id:03x}%{color:reset} %{message}"
+            - CORE_PEER_ADDRESSAUTODETECT=false
+            - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=host  # uncomment this to use specific network
+            - CORE_PEER_GOSSIP_USELEADERELECTION=true
+            - CORE_PEER_GOSSIP_ORGLEADER=false  # whether this node is the org leader, default to false
+            - CORE_OPERATIONS_LISTENADDRESS=0.0.0.0:9443  # operation RESTful API
+            - CORE_METRICS_PROVIDER=prometheus  # prometheus will pull metrics from fabric via /metrics RESTful API
+            - CORE_PEER_PROFILE_ENABLED=false
+            - CORE_PEER_TLS_ENABLED=true
+            - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
+            - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
+            - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
+            - CORE_CHAINCODE_BUILDER=hyperledger/fabric-ccenv:2.4.1
+            - CORE_CHAINCODE_GOLANG_RUNTIME=hyperledger/fabric-baseos:2.4.1
+            - CORE_CHAINCODE_JAVA_RUNTIME=hyperledger/fabric-javaenv:2.4.1
+            - CORE_CHAINCODE_NODE_RUNTIME=hyperledger/fabric-nodeenv:2.4.1
+            - CORE_PEER_ID=peer0.org2.example.com
+            - CORE_PEER_ADDRESS=peer0.org2.example.com:7051
+            - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7052
+            - CORE_PEER_CHAINCODEADDRESS=peer0.org2.example.com:7052
+            - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org2.example.com:7051
+            - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org2.example.com:7051
+            - CORE_PEER_LOCALMSPID=Org2MSP
+            - FABRIC_LOGGING_SPEC=DEBUG # info:core.chaincode=debug
+            - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+            - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=peer0.org1.couchdb:5984
+            - CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=admin
+            - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=adminpw
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+            - ./crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/msp:/etc/hyperledger/fabric/msp
+            - ./crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls:/etc/hyperledger/fabric/tls
+        expose:
+            - "7051"  # gRPC
+            - "9443"  # Operation REST
+        #command: bash -c 'bash /tmp/peer_build.sh; peer node start'
+        command: peer node start
+        depends_on:
+            - orderer0.example.com
+            - orderer1.example.com
+            - orderer2.example.com
+            - peer0.org1.couchdb
+
+
+    peer1.org2.example.com:
+        image: hyperledger/fabric-peer:2.4.1
+        restart: always
+        container_name: peer1.org2.example.com
+        hostname: peer1.org2.example.com
+        ports:
+            - 8051:7051
+            - 8052:7052
+            - 9444:9443
+        extra_hosts:
+            - "orderer0.example.com:192.168.0.105"
+            - "orderer1.example.com:192.168.0.105"
+            - "orderer2.example.com:192.168.0.105"
+            - "peer0.org1.example.com:192.168.0.109"
+            - "peer1.org1.example.com:192.168.0.109"
+            - "peer0.org2.example.com:192.168.0.110"
+            - "peer1.org2.example.com:192.168.0.110"
+        environment:
+            - FABRIC_LOGGING_SPEC=INFO
+            - FABRIC_LOGGING_FORMAT="%{color}%{time:2006-01-02 15:04:05.000 MST} [%{module}] %{shortfunc} -> %{level:.4s} %{id:03x}%{color:reset} %{message}"
+            - CORE_PEER_ADDRESSAUTODETECT=false
+            - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=host  # uncomment this to use specific network
+            - CORE_PEER_GOSSIP_USELEADERELECTION=true
+            - CORE_PEER_GOSSIP_ORGLEADER=false  # whether this node is the org leader, default to false
+            - CORE_OPERATIONS_LISTENADDRESS=0.0.0.0:9443  # operation RESTful API
+            - CORE_METRICS_PROVIDER=prometheus  # prometheus will pull metrics from fabric via /metrics RESTful API
+            - CORE_PEER_PROFILE_ENABLED=false
+            - CORE_PEER_TLS_ENABLED=true
+            - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
+            - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
+            - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
+            - CORE_CHAINCODE_BUILDER=hyperledger/fabric-ccenv:2.4.1
+            - CORE_CHAINCODE_GOLANG_RUNTIME=hyperledger/fabric-baseos:2.4.1
+            - CORE_CHAINCODE_JAVA_RUNTIME=hyperledger/fabric-javaenv:2.4.1
+            - CORE_CHAINCODE_NODE_RUNTIME=hyperledger/fabric-nodeenv:2.4.1
+            - CORE_PEER_ID=peer1.org2.example.com
+            - CORE_PEER_ADDRESS=peer1.org2.example.com:8051
+            - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7052
+            - CORE_PEER_CHAINCODEADDRESS=peer1.org2.example.com:8052
+            - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer1.org2.example.com:8051
+            - CORE_PEER_GOSSIP_BOOTSTRAP=peer1.org2.example.com:8051
+            - CORE_PEER_LOCALMSPID=Org2MSP
+            - FABRIC_LOGGING_SPEC=DEBUG # info:core.chaincode=debug
+            - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+            - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=peer1.org2.couchdb:5984
+            - CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=admin
+            - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=adminpw
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+            - ./crypto-config/peerOrganizations/org2.example.com/peers/peer1.org2.example.com/msp:/etc/hyperledger/fabric/msp
+            - ./crypto-config/peerOrganizations/org2.example.com/peers/peer1.org2.example.com/tls:/etc/hyperledger/fabric/tls
+        expose:
+            - "8051"  # gRPC
+            - "9444"  # Operation REST
+        #command: bash -c 'bash /tmp/peer_build.sh; peer node start'
+        command: peer node start
+        depends_on:
+            - orderer0.example.com
+            - orderer1.example.com
+            - orderer2.example.com
+            - peer1.org2.couchdb
+
+
+    peer0.org1.couchdb:
+        image: couchdb:3.1.1
+        container_name: peer0.org1.couchdb
+        restart: always
+        ports:
+            - 5984:5984  # this is the restful API addr, can also access fauxton web ui thru http://localhost:5984/_utils/
+        environment:
+            - COUCHDB_USER=admin
+            - COUCHDB_PASSWORD=adminpw
+
+    peer1.org2.couchdb:
+        image: couchdb:3.1.1
+        container_name: peer1.org2.couchdb
+        restart: always
+        ports:
+            - 6984:5984  # this is the restful API addr, can also access fauxton web ui thru http://localhost:5984/_utils/
+        environment:
+            - COUCHDB_USER=admin
+            - COUCHDB_PASSWORD=adminpw
+
